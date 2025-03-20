@@ -7,6 +7,12 @@ const fastify = Fastify({
   logger: true,
 })
 
+// Vérifiez que les variables d'environnement nécessaires sont définies
+if (!process.env.API_KEY) {
+  fastify.log.error('API_KEY is not set in the environment variables.')
+  process.exit(1)
+}
+
 // Enregistrement des routes
 fastify.register(cityRoutes)
 
@@ -16,6 +22,7 @@ fastify.setErrorHandler((error, request, reply) => {
   reply.status(500).send({ error: 'Internal Server Error' })
 })
 
+// Démarrage du serveur
 fastify.listen(
   {
     port: process.env.PORT || 3000,
