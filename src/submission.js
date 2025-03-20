@@ -1,3 +1,5 @@
+import fetch from 'node-fetch'
+
 export const submitForReview = async (fastify) => {
   if (process.env.RENDER_EXTERNAL_URL) {
     if (!process.env.API_KEY) {
