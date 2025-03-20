@@ -9,22 +9,20 @@ export default async function cityRoutes(fastify) {
     const { cityId } = request.params
 
     try {
-      // Récupérer les informations de la ville
+      fastify.log.info(`Fetching city info for cityId: ${cityId}`)
+
       const cityResponse = await axios.get(`https://api-ugi2pflmha-ew.a.run.app/cities/${cityId}`)
       const cityData = cityResponse.data
 
-      // Vérifiez que les données de la ville sont valides
       if (!cityData.coordinates || !Array.isArray(cityData.coordinates)) {
         throw new Error('Invalid city data')
       }
 
-      // Récupérer les prévisions météorologiques
       const weatherResponse = await axios.get(
         `https://api-ugi2pflmha-ew.a.run.app/weather?lat=${cityData.coordinates[0]}&lon=${cityData.coordinates[1]}`
       )
       const weatherData = weatherResponse.data
 
-      // Récupérer les recettes associées à la ville
       const recipes = cityRecipes[cityId] || []
 
       reply.send({
@@ -38,6 +36,7 @@ export default async function cityRoutes(fastify) {
         recipes,
       })
     } catch (error) {
+      fastify.log.error(`Error fetching city info for cityId: ${cityId}`, error.message)
       reply.status(404).send({ error: 'City not found or invalid data' })
     }
   })
@@ -48,10 +47,10 @@ export default async function cityRoutes(fastify) {
     const { content } = request.body
 
     try {
-      // Vérifier si la ville existe
+      fastify.log.info(`Adding recipe for cityId: ${cityId}`)
+
       await axios.get(`https://api-ugi2pflmha-ew.a.run.app/cities/${cityId}`)
 
-      // Validation du contenu
       if (!content) {
         return reply.status(400).send({ error: 'Content is required' })
       }
@@ -62,7 +61,6 @@ export default async function cityRoutes(fastify) {
         return reply.status(400).send({ error: 'Content is too long' })
       }
 
-      // Créer une nouvelle recette
       const newRecipe = { id: recipeIdCounter++, content }
       if (!cityRecipes[cityId]) {
         cityRecipes[cityId] = []
@@ -70,7 +68,8 @@ export default async function cityRoutes(fastify) {
       cityRecipes[cityId].push(newRecipe)
 
       reply.status(201).send(newRecipe)
-    } catch {
+    } catch (error) {
+      fastify.log.error(`Error adding recipe for cityId: ${cityId}`, error.message)
       reply.status(404).send({ error: 'City not found' })
     }
   })
@@ -80,10 +79,10 @@ export default async function cityRoutes(fastify) {
     const { cityId, recipeId } = request.params
 
     try {
-      // Vérifier si la ville existe
+      fastify.log.info(`Deleting recipe with id: ${recipeId} for cityId: ${cityId}`)
+
       await axios.get(`https://api-ugi2pflmha-ew.a.run.app/cities/${cityId}`)
 
-      // Supprimer la recette
       const recipes = cityRecipes[cityId] || []
       const recipeIndex = recipes.findIndex((r) => r.id === parseInt(recipeId))
 
@@ -93,7 +92,8 @@ export default async function cityRoutes(fastify) {
 
       recipes.splice(recipeIndex, 1)
       reply.status(204).send()
-    } catch {
+    } catch (error) {
+      fastify.log.error(`Error deleting recipe with id: ${recipeId} for cityId: ${cityId}`, error.message)
       reply.status(404).send({ error: 'City not found' })
     }
   })

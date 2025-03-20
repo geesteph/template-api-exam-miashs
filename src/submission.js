@@ -8,25 +8,29 @@ export const submitForReview = async (fastify) => {
     }
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const response = await fetch(`https://api-ugi2pflmha-ew.a.run.app/group/submissions?apiKey=${process.env.API_KEY}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: JSON.stringify({
-          apiUrl: process.env.RENDER_EXTERNAL_URL,
-        }),
-      })
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch(
+        `https://api-ugi2pflmha-ew.a.run.app/group/submissions?apiKey=${process.env.API_KEY}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            apiUrl: process.env.RENDER_EXTERNAL_URL,
+          }),
+        }
+      )
 
       if (response.ok) {
         fastify.log.info('API submitted for review, see https://miashs-exam-api.web.app/')
       } else {
-        throw new Error(response.status)
+        const errorText = await response.text()
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
       }
     } catch (error) {
-      fastify.log.error('Error while submitting your API for review:', error)
+      fastify.log.error('Error while submitting your API for review:', error.message)
     }
   }
 }
