@@ -14,14 +14,16 @@ fastify.delete('/cities/:cityId/recipes/:recipeId', deleteCityRecipe)
 
 fastify.listen(
   {
-    port: process.env.PORT || 3000,
-    host: process.env.RENDER_EXTERNAL_URL ? '0.0.0.0' : process.env.HOST || 'localhost',
+    port: parseInt(process.env.PORT, 10) || 3000, // Utilisez le port fourni par Render
+    host: '0.0.0.0', // Assurez-vous que l'application écoute sur toutes les interfaces réseau
   },
-  function (err) {
+  function (err, address) {
     if (err) {
       fastify.log.error(err)
       process.exit(1)
     }
+
+    fastify.log.info(`Server is running at ${address}`)
 
     //////////////////////////////////////////////////////////////////////
     // Don't delete this line, it is used to submit your API for review //
