@@ -3,32 +3,33 @@ import Fastify from 'fastify'
 import { submitForReview } from './submission.js'
 import { getCityInfos, addCityRecipe, deleteCityRecipe } from './cities.js'
 
-const fastify = Fastify({
+const app = Fastify({
   logger: true,
 })
 
-// Enregistrement des routes
-fastify.get('/cities/:cityId/infos', getCityInfos)
-fastify.post('/cities/:cityId/recipes', addCityRecipe)
-fastify.delete('/cities/:cityId/recipes/:recipeId', deleteCityRecipe)
+// Register routes
+app.get('/cities/:cityId/infos', getCityInfos)
+app.post('/cities/:cityId/recipes', addCityRecipe)
+app.delete('/cities/:cityId/recipes/:recipeId', deleteCityRecipe)
 
-fastify.listen(
+// Start the server
+app.listen(
   {
-    port: parseInt(process.env.PORT, 10) || 3000, // Utilisez le port fourni par Render
-    host: '0.0.0.0', // Assurez-vous que l'application écoute sur toutes les interfaces réseau
+    port: parseInt(process.env.PORT, 10) || 3000, // Use the port provided by Render
+    host: '0.0.0.0', // Ensure the application listens on all network interfaces
   },
   function (err, address) {
     if (err) {
-      fastify.log.error(err)
+      app.log.error(err)
       process.exit(1)
     }
 
-    fastify.log.info(`Server is running at ${address}`)
+    app.log.info(`Server is running at ${address}`)
 
     //////////////////////////////////////////////////////////////////////
     // Don't delete this line, it is used to submit your API for review //
     // everytime your start your server.                                //
     //////////////////////////////////////////////////////////////////////
-    submitForReview(fastify)
+    submitForReview(app)
   }
 )
